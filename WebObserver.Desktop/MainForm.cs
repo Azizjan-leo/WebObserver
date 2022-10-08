@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 using System.Windows.Forms;
 using CefSharp;
 using CefSharp.Handler;
@@ -10,11 +11,17 @@ namespace WebObserver.Desktop
     {
         string USER_AGENT = "";
         string CACHE_PATH = "";
+        string PROXY_URL = "";
+        int PROXY_PORT; 
 
-        public MainForm()
+        public MainForm(string[] args)
         {
+            PROXY_URL = args[0].Split(':')[0];
+            PROXY_PORT = int.Parse(args[0].Split(':')[1]);
+            
             InitializeComponent();
             InitializeChromium();
+
         }
         public ChromiumWebBrowser chromeBrowser;
 
@@ -37,7 +44,7 @@ namespace WebObserver.Desktop
             };
 
             var requestContextHander = new RequestContextHandler()
-                .SetProxyOnContextInitialized("localhost", 8080);
+                .SetProxyOnContextInitialized(PROXY_URL, PROXY_PORT);
 
             var requestContext = new RequestContext(requestContextHander);
 
