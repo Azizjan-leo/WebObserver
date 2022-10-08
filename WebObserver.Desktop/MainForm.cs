@@ -39,24 +39,25 @@ namespace WebObserver.Desktop
 
             if (string.IsNullOrEmpty(CACHE_PATH) || string.IsNullOrWhiteSpace(CACHE_PATH))
                 CACHE_PATH = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\CEF";
+                      
+            RequestContextHandler requestContextHander = new RequestContextHandler();
+            if (!string.IsNullOrEmpty(PROXY_URL) && !string.IsNullOrWhiteSpace(PROXY_URL))
+            {
+                requestContextHander = new RequestContextHandler()
+                    .SetProxyOnContextInitialized(PROXY_URL, PROXY_PORT);
+            }
+            var requestContext = new RequestContext(requestContextHander);
 
             CefSettings settings = new CefSettings
             {
                 CachePath = CACHE_PATH,
                 UserAgent = USER_AGENT
             };
-            RequestContextHandler requestContextHander = new RequestContextHandler();
-
-            if (!string.IsNullOrEmpty(PROXY_URL) && !string.IsNullOrWhiteSpace(PROXY_URL))
-            {
-                requestContextHander = new RequestContextHandler()
-                    .SetProxyOnContextInitialized(PROXY_URL, PROXY_PORT);
-            }
-
-            var requestContext = new RequestContext(requestContextHander);
 
             // Initialize cef with the provided settings
+            settings.DisableGpuAcceleration();
             Cef.Initialize(settings);
+       
             // Create a browser component
             chromeBrowser = new ChromiumWebBrowser("https://whois.domaintools.com/whois/msn.com", requestContext);
             // Add it to the form and fill it to the form window.
