@@ -16,8 +16,11 @@ namespace WebObserver.Desktop
 
         public MainForm(string[] args)
         {
-            PROXY_URL = args[0].Split(':')[0];
-            PROXY_PORT = int.Parse(args[0].Split(':')[1]);
+            if(args != null && args.Length > 0)
+            {
+                PROXY_URL = args[0].Split(':')[0];
+                PROXY_PORT = int.Parse(args[0].Split(':')[1]);
+            }
             
             InitializeComponent();
             InitializeChromium();
@@ -42,9 +45,13 @@ namespace WebObserver.Desktop
                 CachePath = CACHE_PATH,
                 UserAgent = USER_AGENT
             };
+            RequestContextHandler requestContextHander = new RequestContextHandler();
 
-            var requestContextHander = new RequestContextHandler()
-                .SetProxyOnContextInitialized(PROXY_URL, PROXY_PORT);
+            if (!string.IsNullOrEmpty(PROXY_URL) && !string.IsNullOrWhiteSpace(PROXY_URL))
+            {
+                requestContextHander = new RequestContextHandler()
+                    .SetProxyOnContextInitialized(PROXY_URL, PROXY_PORT);
+            }
 
             var requestContext = new RequestContext(requestContextHander);
 
