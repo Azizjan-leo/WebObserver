@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Windows.Forms;
 using CefSharp;
+using CefSharp.Handler;
 using CefSharp.WinForms;
 
 namespace WebObserver.Desktop
 {
     public partial class MainForm : Form
     {
-        const string USER_AGENT = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.5195.125 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)\r\n";
+        string USER_AGENT = "";
+        string CACHE_PATH = "";
 
         public MainForm()
         {
@@ -22,16 +24,27 @@ namespace WebObserver.Desktop
 
         private void InitializeChromium()
         {
+            if (string.IsNullOrEmpty(USER_AGENT) || string.IsNullOrWhiteSpace(USER_AGENT))
+                USER_AGENT = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.5195.125 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)\r\n";
+
+            if (string.IsNullOrEmpty(CACHE_PATH) || string.IsNullOrWhiteSpace(CACHE_PATH))
+                CACHE_PATH = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\CEF";
+
             CefSettings settings = new CefSettings
             {
-                CachePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\CEF",
+                CachePath = CACHE_PATH,
                 UserAgent = USER_AGENT
             };
+
+            var requestContextHander = new RequestContextHandler()
+                .SetProxyOnContextInitialized("localhost", 8080);
+
+            var requestContext = new RequestContext(requestContextHander);
 
             // Initialize cef with the provided settings
             Cef.Initialize(settings);
             // Create a browser component
-            chromeBrowser = new ChromiumWebBrowser("https://whois.domaintools.com/whois/msn.com");
+            chromeBrowser = new ChromiumWebBrowser("https://whois.domaintools.com/whois/msn.com", requestContext);
             // Add it to the form and fill it to the form window.
             this.Controls.Add(chromeBrowser);
             chromeBrowser.Dock = DockStyle.Fill;
