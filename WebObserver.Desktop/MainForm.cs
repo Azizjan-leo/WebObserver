@@ -20,11 +20,17 @@ namespace WebObserver.Desktop
 
         private void InitializeChromium()
         {
-            CefSettings settings = new CefSettings();
+            CefSettings settings = new CefSettings
+            {
+                CachePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\CEF"
+            };
+
+            settings.CachePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\CEF";
+
             // Initialize cef with the provided settings
             Cef.Initialize(settings);
             // Create a browser component
-            chromeBrowser = new ChromiumWebBrowser("http://ourcodeworld.com");
+            chromeBrowser = new ChromiumWebBrowser("https://whois.domaintools.com/whois/msn.com");
             // Add it to the form and fill it to the form window.
             this.Controls.Add(chromeBrowser);
             chromeBrowser.Dock = DockStyle.Fill;
