@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Windows;
 using System.Windows.Forms;
 using CefSharp;
 using CefSharp.Handler;
@@ -9,19 +8,24 @@ namespace WebObserver.Desktop
 {
     public partial class MainForm : Form
     {
-        string USER_AGENT = "";
-        string CACHE_PATH = "";
-        string PROXY_URL = "";
-        int PROXY_PORT; 
+        // setup user agent here. leave empty for default
+        private const string USER_AGENT = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.5195.125 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)\r\n";
+
+        private readonly string _cachePath;
+
+        private readonly string _proxyUrl;
+        private readonly int _proxyPort;
 
         public MainForm(string[] args)
         {
-            if(args != null && args.Length > 0)
+            if (args != null && args.Length > 0)
             {
-                PROXY_URL = args[0].Split(':')[0];
-                PROXY_PORT = int.Parse(args[0].Split(':')[1]);
+                _proxyUrl = args[0].Split(':')[0];
+                _proxyPort = int.Parse(args[0].Split(':')[1]);
             }
-            
+
+            _cachePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\CEF";
+
             InitializeComponent();
             InitializeChromium();
 
@@ -34,30 +38,29 @@ namespace WebObserver.Desktop
 
         private void InitializeChromium()
         {
-            if (string.IsNullOrEmpty(USER_AGENT) || string.IsNullOrWhiteSpace(USER_AGENT))
-                USER_AGENT = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.5195.125 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)\r\n";
 
-            if (string.IsNullOrEmpty(CACHE_PATH) || string.IsNullOrWhiteSpace(CACHE_PATH))
-                CACHE_PATH = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\CEF";
-                      
+            CefSettings settings = new CefSettings();
+
+            if (!string.IsNullOrWhiteSpace(_cachePath))
+                settings.CachePath = _cachePath;
+
+            if (!string.IsNullOrWhiteSpace(USER_AGENT))
+                settings.UserAgent = USER_AGENT;
+
+            settings.DisableGpuAcceleration();
+
             RequestContextHandler requestContextHander = new RequestContextHandler();
-            if (!string.IsNullOrEmpty(PROXY_URL) && !string.IsNullOrWhiteSpace(PROXY_URL))
+
+            if (!string.IsNullOrEmpty(_proxyUrl) && !string.IsNullOrWhiteSpace(_proxyUrl))
             {
                 requestContextHander = new RequestContextHandler()
-                    .SetProxyOnContextInitialized(PROXY_URL, PROXY_PORT);
+                    .SetProxyOnContextInitialized(_proxyUrl, _proxyPort);
             }
+
             var requestContext = new RequestContext(requestContextHander);
 
-            CefSettings settings = new CefSettings
-            {
-                CachePath = CACHE_PATH,
-                UserAgent = USER_AGENT
-            };
-
             // Initialize cef with the provided settings
-            settings.DisableGpuAcceleration();
             Cef.Initialize(settings);
-       
             // Create a browser component
             chromeBrowser = new ChromiumWebBrowser("https://whois.domaintools.com/whois/msn.com", requestContext);
             // Add it to the form and fill it to the form window.
