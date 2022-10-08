@@ -7,6 +7,8 @@ namespace WebObserver.Desktop
 {
     public partial class MainForm : Form
     {
+        const string USER_AGENT = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.5195.125 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)\r\n";
+
         public MainForm()
         {
             InitializeComponent();
@@ -22,10 +24,9 @@ namespace WebObserver.Desktop
         {
             CefSettings settings = new CefSettings
             {
-                CachePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\CEF"
+                CachePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\CEF",
+                UserAgent = USER_AGENT
             };
-
-            settings.CachePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\CEF";
 
             // Initialize cef with the provided settings
             Cef.Initialize(settings);
