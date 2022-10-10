@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
 using CefSharp;
-using CefSharp.Handler;
 using CefSharp.WinForms;
 
 namespace WebObserver.Desktop
@@ -14,14 +13,12 @@ namespace WebObserver.Desktop
         private readonly string _cachePath;
 
         private readonly string _proxyUrl;
-        private readonly int _proxyPort;
 
         public MainForm(string[] args)
         {
             if (args != null && args.Length > 0)
             {
-                _proxyUrl = args[0].Split(':')[0];
-                _proxyPort = int.Parse(args[0].Split(':')[1]);
+                _proxyUrl = args[0];
             }
 
             _cachePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\CEF";
@@ -40,6 +37,8 @@ namespace WebObserver.Desktop
         {
 
             CefSettings settings = new CefSettings();
+            if (!string.IsNullOrWhiteSpace(_proxyUrl))
+                settings.CefCommandLineArgs.Add("proxy-server", _proxyUrl);
 
             if (!string.IsNullOrWhiteSpace(_cachePath))
                 settings.CachePath = _cachePath;
@@ -49,20 +48,10 @@ namespace WebObserver.Desktop
 
             settings.DisableGpuAcceleration();
 
-            RequestContextHandler requestContextHander = new RequestContextHandler();
-
-            if (!string.IsNullOrEmpty(_proxyUrl) && !string.IsNullOrWhiteSpace(_proxyUrl))
-            {
-                requestContextHander = new RequestContextHandler()
-                    .SetProxyOnContextInitialized(_proxyUrl, _proxyPort);
-            }
-
-            var requestContext = new RequestContext(requestContextHander);
-
             // Initialize cef with the provided settings
             Cef.Initialize(settings);
             // Create a browser component
-            chromeBrowser = new ChromiumWebBrowser("https://whois.domaintools.com/whois/msn.com", requestContext);
+            chromeBrowser = new ChromiumWebBrowser("https://whois.domaintools.com/whois/msn.com");
             // Add it to the form and fill it to the form window.
             this.Controls.Add(chromeBrowser);
             chromeBrowser.Dock = DockStyle.Fill;
